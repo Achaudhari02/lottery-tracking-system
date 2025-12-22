@@ -3,4 +3,4 @@ from .models import Business, Store, Pack, Game, PackUpdate
 
 # Register your models here.
 
-admin.site.register(['Business', 'Store', 'Pack', 'Game', 'PackUpdate'])
+admin.site.register([Business, Store, Pack, Game, PackUpdate])

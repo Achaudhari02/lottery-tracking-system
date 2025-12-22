@@ -5,10 +5,18 @@ from django.contrib.auth.models import User
 
 class Business (models.Model):
     name = models.CharField(max_length=100)
-    owner = models.ForeignKey(User,on_delete=models.CASCADE)
+    owner = models.ForeignKey(User,on_delete=models.PROTECT, related_name="owned_businesses")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+class Store(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name="stores")
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+    store_code = models.CharField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class UserProfile(models.Model):
     
@@ -19,69 +27,68 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User,on_delete=models.CASCADE)
     role = models.CharField(max_length=4, choices=ROLES)
-    stores = models.ManyToManyField(User)
+    stores = models.ManyToManyField(Store, related_name="assigned_stores", blank=True)
 
-class Store(models.Model):
-    business = models.ForeignKey(Business, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
-    store_code = models.CharField(max_length=100)
-    is_active = models.BooleanField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 class Game(models.Model):
 
     STATUSES = {
         "ACTIVE": "Active",
-        "INACTIVE": "Inactive"
+        "ENDED": "ENDED"
     }
-    business = models.ForeignKey(Business, on_delete=models.CASCADE)
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name="games")
     game_number = models.PositiveIntegerField()
     name = models.CharField(max_length=100)
-    ticket_price = models.PositiveSmallIntegerField()
+    ticket_price = models.DecimalField(max_digits=6, decimal_places=2)
     status = models.CharField(max_length=8, choices=STATUSES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tickets_per_pack = models.PositiveSmallIntegerField()
 
     class Meta:
 
         constraints = [
-            models.UniqueConstraint(fields=["business","game_number"])
+            models.UniqueConstraint(fields=["business","game_number"], name="unique_game_per_business")
         ]
 
 class Pack(models.Model):
     
-    STATUES = {
+    STATUSES = {
         "RS" : "Received",
         "AC" : "Active",
         "ST" : "Settled",
         "LS" : "Lost or Stolen"
     }
 
-    store = models.ForeignKey(Store, on_delete=models.PROTECT)
-    game = models.ForeignKey(Game, on_delete=models.PROTECT)
-    barcode = models.CharField(max_length=100)
+    store = models.ForeignKey(Store, on_delete=models.PROTECT, related_name="packs")
+    game = models.ForeignKey(Game, on_delete=models.PROTECT, related_name="packs")
+    barcode = models.CharField(max_length=100, unique=True)
     starting_ticket = models.PositiveSmallIntegerField()
     ending_ticket = models.PositiveSmallIntegerField()
-    last_ticket_sold= models.PositiveSmallIntegerField()
-    status = models.CharField(max_length=2, choices=STATUES)
-    current_location = models.CharField(max_length=100)
-    received_by = models.ForeignKey(User, on_delete=models.SET_NULL)
-    received_at = models.DateTimeField() 
-    activated_by = models.ForeignKey(User, on_delete=models.SET_NULL)
-    activated_at = models.DateTimeField()
-    settled_by = models.ForeignKey(User, on_delete=models.SET_NULL)
-    settled_at = models.DateTimeField()
-    lost_stolen_reason = models.CharField()
-    lost_stolen_reported_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    last_ticket_sold= models.PositiveSmallIntegerField(null=True)
+    status = models.CharField(max_length=2, choices=STATUSES)
+    current_location = models.CharField(max_length=100,blank=True)
+    received_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="received_packs",null=True)
+    received_at = models.DateTimeField(auto_now_add=True) 
+    activated_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="activated_packs",null=True,blank=True)
+    activated_at = models.DateTimeField(null=True,blank=True)
+    settled_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="settled_packs",null=True,blank=True)
+    settled_at = models.DateTimeField(null=True,blank=True)
+    lost_stolen_reason = models.CharField(max_length=500, blank=True)
+    lost_stolen_reported_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="lost_packs",null=True,blank=True)
+    lost_stolen_reported_at = models.DateTimeField(null=True,blank=True)
 
 class PackUpdate(models.Model):
-    pack = models.ForeignKey(Pack, on_delete=models.CASCADE)
-    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL)
+    pack = models.ForeignKey(Pack, on_delete=models.CASCADE, related_name="updates")
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="pack_updates_created", null=True)
     updated_at =models.DateTimeField(auto_now_add=True)
-    previous_last_sold = models.PositiveSmallIntegerField()
+    previous_last_sold = models.PositiveSmallIntegerField(null=True,blank=True)
     new_last_ticket = models.PositiveSmallIntegerField()
+    tickets_sold_this_update = models.PositiveSmallIntegerField()
+    #do not need the notes field 
+
+    class Meta: 
+        ordering = ['-updated_at']
     
 
     

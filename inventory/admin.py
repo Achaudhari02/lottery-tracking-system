@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Business, Store, Pack, Game, PackUpdate
+from .models import Business, Store, Pack, Game, PackUpdate, UserProfile
 
 # Register your models here.
 
-admin.site.register([Business, Store, Pack, Game, PackUpdate])
+admin.site.register([Business, Store, Pack, Game, PackUpdate, UserProfile])

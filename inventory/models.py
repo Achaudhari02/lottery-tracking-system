@@ -9,6 +9,9 @@ class Business (models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Name: {self.name} Owner: {self.name}"
+
 class Store(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name="stores")
     name = models.CharField(max_length=100)
@@ -17,6 +20,9 @@ class Store(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'Name: {self.name} created at: {self.created_at}'
 
 class UserProfile(models.Model):
     
@@ -28,6 +34,10 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
     role = models.CharField(max_length=4, choices=ROLES)
     stores = models.ManyToManyField(Store, related_name="assigned_stores", blank=True)
+
+    def __str__(self):
+        store_names = ",".join(self.stores.values_list("name",flat=True))
+        return f"Role: {self.role} Store(s): {store_names}"
 
 
 class Game(models.Model):
@@ -50,6 +60,8 @@ class Game(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["business","game_number"], name="unique_game_per_business")
         ]
+    def __str__(self):
+        return f"Name: {self.name} Price: {self.ticket_price} Status: {self.status}"
 
 class Pack(models.Model):
     
@@ -78,6 +90,9 @@ class Pack(models.Model):
     lost_stolen_reported_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="lost_packs",null=True,blank=True)
     lost_stolen_reported_at = models.DateTimeField(null=True,blank=True)
 
+    def __str__(self):
+        return f"Store: {self.store.name} Game: {self.game.name}"
+
 class PackUpdate(models.Model):
     pack = models.ForeignKey(Pack, on_delete=models.CASCADE, related_name="updates")
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name="pack_updates_created", null=True)
@@ -89,6 +104,9 @@ class PackUpdate(models.Model):
 
     class Meta: 
         ordering = ['-updated_at']
+    
+    def __str__(self):
+        return f"Updated by: {self.updated_by.username}"
     
 
     

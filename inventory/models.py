@@ -10,7 +10,7 @@ class Business (models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Name: {self.name} Owner: {self.name}"
+        return f"Name: {self.name} Owner: {self.owner}"
 
 class Store(models.Model):
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name="stores")
@@ -22,7 +22,7 @@ class Store(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'Name: {self.name} created at: {self.created_at}'
+        return f'Name: {self.name} business: {self.business.name}'
 
 class UserProfile(models.Model):
     
@@ -77,7 +77,7 @@ class Pack(models.Model):
     barcode = models.CharField(max_length=100, unique=True)
     starting_ticket = models.PositiveSmallIntegerField()
     ending_ticket = models.PositiveSmallIntegerField()
-    last_ticket_sold= models.PositiveSmallIntegerField(null=True)
+    last_ticket_sold= models.PositiveSmallIntegerField(null=True, blank=True)
     status = models.CharField(max_length=2, choices=STATUSES)
     current_location = models.CharField(max_length=100,blank=True)
     received_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="received_packs",null=True)

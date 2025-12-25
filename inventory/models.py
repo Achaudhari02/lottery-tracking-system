@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 
 # Create your models here.
 
@@ -74,12 +75,26 @@ class Pack(models.Model):
 
     store = models.ForeignKey(Store, on_delete=models.PROTECT, related_name="packs")
     game = models.ForeignKey(Game, on_delete=models.PROTECT, related_name="packs")
-    barcode = models.CharField(max_length=100, unique=True)
+    # pack barcode xxxx-xxxxxxx-xxx game-pack-ticket
+    barcode = models.CharField(max_length=100, unique=True, validators= [
+        RegexValidator(
+            regex=r'^\d{4}-\d{7}-\d{3}$',
+            message="Please enter a valid barcode",
+            code="invalid_barcode"
+        )
+    ],
+    )
+    # pack number extracted from the barcode
+    pack_number = models.PositiveIntegerField()
+    # the starting ticket number typically 000
     starting_ticket = models.PositiveSmallIntegerField()
+    # the number of the last ticket in the pack
     ending_ticket = models.PositiveSmallIntegerField()
-    last_ticket_sold= models.PositiveSmallIntegerField(null=True, blank=True)
+    # the current ticket the pack in on 
+    current_ticket= models.PositiveSmallIntegerField(null=True, blank=True)
     status = models.CharField(max_length=2, choices=STATUSES)
-    current_location = models.CharField(max_length=100,blank=True)
+    # physical box number that the pack is located in
+    current_location = models.PositiveSmallIntegerField(max_length=100,blank=True)
     received_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="received_packs",null=True)
     received_at = models.DateTimeField(auto_now_add=True) 
     activated_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="activated_packs",null=True,blank=True)
@@ -92,6 +107,26 @@ class Pack(models.Model):
 
     def __str__(self):
         return f"Store: {self.store.name} Game: {self.game.name}"
+    
+
+    @property
+    def tickets_sold(self):
+        if self.current_ticket == None: 
+            return 0
+        return self.current_ticket
+    
+    @property
+    def tickets_remaining(self):
+        if self.current_ticket == None: 
+            return self.ending_ticket + 1
+        return (self.ending_ticket - self.current_ticket) + 1
+    
+    @property
+    def percent_complete(self):
+        if self.current_ticket == None or self.current_ticket == 0: 
+            return 0.00
+        percentage = ((self.current_ticket) / (self.ending_ticket + 1)) * 100
+        return percentage
 
 class PackUpdate(models.Model):
     pack = models.ForeignKey(Pack, on_delete=models.CASCADE, related_name="updates")

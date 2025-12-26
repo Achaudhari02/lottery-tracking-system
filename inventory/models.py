@@ -79,7 +79,7 @@ class Pack(models.Model):
     barcode = models.CharField(max_length=100, unique=True, validators= [
         RegexValidator(
             regex=r'^\d{4}-\d{7}-\d{3}$',
-            message="Please enter a valid barcode",
+            message="Please enter a valid barcode. Barcode must be in the following format (Digits only): xxxx-xxxxxxx-xxx",
             code="invalid_barcode"
         )
     ],
@@ -92,9 +92,11 @@ class Pack(models.Model):
     ending_ticket = models.PositiveSmallIntegerField()
     # the current ticket the pack in on 
     current_ticket= models.PositiveSmallIntegerField(null=True, blank=True)
+    # previous ticket number at shift close
+    previous_ticket = models.PositiveSmallIntegerField(null=True,blank=True)
     status = models.CharField(max_length=2, choices=STATUSES)
     # physical box number that the pack is located in
-    current_location = models.PositiveSmallIntegerField(max_length=100,blank=True)
+    current_location = models.PositiveSmallIntegerField(max_length=100,blank=True,null=True)
     received_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="received_packs",null=True)
     received_at = models.DateTimeField(auto_now_add=True) 
     activated_by = models.ForeignKey(User, on_delete=models.SET_NULL,related_name="activated_packs",null=True,blank=True)
@@ -110,7 +112,7 @@ class Pack(models.Model):
     
 
     @property
-    def tickets_sold(self):
+    def total_tickets_sold(self):
         if self.current_ticket == None: 
             return 0
         return self.current_ticket

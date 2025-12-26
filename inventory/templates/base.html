@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LTS - Lottery Tracking System{% endblock %}</title>
+    
+    {# Tailwind CSS - we'll add this later #}
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50">
+    {# Navigation bar - appears on every page #}
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">LTS</h1>
+            <div>
+                {% if user.is_authenticated %}
+                    <span>{{ user.username }}</span>
+                    {% comment %} <a href="{% url 'logout' %}" class="ml-4">Logout</a> {% endcomment %}
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {# Messages - for success/error notifications #}
+    {% if messages %}
+        <div class="container mx-auto mt-4">
+            {% for message in messages %}
+                <div class="p-4 mb-2 rounded {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# Main content area - this is where child templates put their content #}
+    <main class="container mx-auto p-6">
+        {% block content %}
+        {# Child templates will put their content here #}
+        {% endblock %}
+    </main>
+
+    {# Footer - appears on every page #}
+    <footer class="bg-gray-800 text-white p-4 mt-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 Lottery Tracking System</p>
+        </div>
+    </footer>
+
+    {# Extra JavaScript - child templates can add scripts here #}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<h1>This Is the main Home page</h1>
+<h2>Welcome, {{ user.username }}!</h2>
+
+<form method='get' action="{% url 'logout'%}">
+
+    {% csrf_token %}
+    <button class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 mt-4 " type="submit">Log Out</button>
+
+</form>
+
+{% endblock content %}

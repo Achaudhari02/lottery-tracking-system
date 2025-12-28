@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+ 
+ <h1>LOGIN PAGE</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="w-full max-w-sm min-w-[200px] mt-4">
+        <label for='username'>Username</label>
+        <input name='username'class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow" placeholder="Username">
+    </div>
+    <div class="w-full max-w-sm min-w-[200px] mt-4">
+        <label for='password'>Password</label>
+        <input name='password'class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow" placeholder="Password">
+    </div>
+    <button class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 mt-4 " type="submit">Button</button>
+</form>
+
+{% endblock content %}
+
+
+
+                                                                    

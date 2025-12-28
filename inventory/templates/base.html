@@ -8,7 +8,7 @@
     {# Tailwind CSS - we'll add this later #}
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 min-h-screen flex flex-col">
     {# Navigation bar - appears on every page #}
     <nav class="bg-blue-600 text-white p-4">
         <div class="container mx-auto flex justify-between items-center">
@@ -34,7 +34,7 @@
     {% endif %}
 
     {# Main content area - this is where child templates put their content #}
-    <main class="container mx-auto p-6">
+    <main class="container mx-auto p-6 flex-grow">
         {% block content %}
         {# Child templates will put their content here #}
         {% endblock %}
